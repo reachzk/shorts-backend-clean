@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# instalar dependências do sistema (AGORA INCLUINDO FFMPEG)
+# instalar dependências do sistema (INCLUINDO FFMPEG)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     && apt-get clean \
@@ -16,5 +16,5 @@ COPY . .
 # Porta usada pelo Fly.io
 ENV PORT=8080
 
-# iniciar o app
-CMD ["uvicorn", "app:app",]()
+# iniciar o app corretamente
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080"]
