@@ -1,0 +1,12 @@
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+import os
+import uuid
+
+def cortar_video(video_path, start, end, output_folder="/tmp/clips"):
+    os.makedirs(output_folder, exist_ok=True)
+
+    clip_name = f"clip_{uuid.uuid4().hex}.mp4"
+    output_path = os.path.join(output_folder, clip_name)
+
+    ffmpeg_extract_subclip(video_path, start, end, output_path)
+    return output_path

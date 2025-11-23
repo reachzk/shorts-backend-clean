@@ -1,4 +1,5 @@
 fastapi
 uvicorn
-moviepy
 python-multipart
+opencv-python-headless
+moviepy

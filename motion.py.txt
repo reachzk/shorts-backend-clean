@@ -1,0 +1,58 @@
+import cv2
+import os
+
+def detectar_melhores_momentos(video_path, clip_duration=30, sensitivity=40):
+    cap = cv2.VideoCapture(video_path)
+
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    movement_scores = []
+    last_frame = None
+
+    for i in range(total_frames):
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        if last_frame is not None:
+            diff = cv2.absdiff(gray, last_frame)
+            movement = cv2.sumElems(diff)[0]
+            movement_scores.append(movement)
+        else:
+            movement_scores.append(0)
+
+        last_frame = gray
+
+    cap.release()
+
+    # Normaliza pontuações para facilitar
+    max_movement = max(movement_scores) if max(movement_scores) > 0 else 1
+    normalized_scores = [m / max_movement for m in movement_scores]
+
+    # Frame com movimento alto → considerado momento bom
+    key_frames = [i for i, score in enumerate(normalized_scores) if score > 0.4]
+
+    # Converter frames em segundos
+    times = sorted(list(set([int(k / fps) for k in key_frames])))
+
+    clipes = []
+
+    # Criar ranges de clipes de até 30s
+    for t in times:
+        start = max(0, t - 5)        # pega 5s antes do pico
+        end = min(start + clip_duration, int(total_frames / fps))
+
+        clipes.append((start, end))
+
+    # Remover duplicados
+    clipes_unicos = []
+    last_end = -1
+    for c in clipes:
+        if c[0] > last_end:
+            clipes_unicos.append(c)
+            last_end = c[1]
+
+    return clipes_unicos
